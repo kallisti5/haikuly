@@ -1,0 +1,9 @@
+#!/bin/bash
+location=$(dirname $(readlink -f $0))
+os=$(uname)
+arch=$(uname -m)
+bins="${location}/${os}.${arch}"
+
+LD_LIBRARY_PATH="$bins/lib:$LD_LIBRARY_PATH"
+
+${bins}/package $@
