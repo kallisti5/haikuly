@@ -4,6 +4,6 @@ os=$(uname)
 arch=$(uname -m)
 bins="${location}/${os}.${arch}"
 
-LD_LIBRARY_PATH="$bins/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$bins/lib:$LD_LIBRARY_PATH"
 
 ${bins}/package_repo $@
