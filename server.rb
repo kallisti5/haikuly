@@ -6,8 +6,12 @@ require 'sinatra'
 require 'json'
 require 'fileutils'
 
+@repo_base = "/tmp/haikuly"
+
 configure do
-  set :location => "/tmp/haikuly"
+  set :location => @repo_base
+  set :tools => "#{File.dirname(__FILE__)}/tools"
+  set :lock => true
 end
 
 def safe(str)
@@ -20,12 +24,19 @@ def safe(str)
   return true
 end
 
+# BOOT UP
+FileUtils.mkdir_p("#{@repo_base}/public")
+
 get '/version' do
   return { api: 1, server: '1.0.0' }.to_json
 end
 
 get '/repo' do
-  return {test: { arch: "x86_64" } }.to_json
+  results = Array.new
+  Dir.glob("#{settings.location}/public/*/").each do |repo|
+    results.push({"name": repo})
+  end
+  return results.to_json
 end
 
 post '/repo' do
