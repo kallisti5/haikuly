@@ -45,17 +45,36 @@ get '/repo' do
 end
 
 post '/repo' do
-  if !params[:name] or !safe(params[:name])
+  payload = JSON.parse(request.body.read)
+  if !payload.fetch("name", nil) or !safe(payload.fetch("name"))
     status 400
     return {error: "Invalid repo name!"}.to_json
   end
-  name = params[:name]
+  name = payload.fetch("name")
+
   if Dir.exist?("#{settings.location}/#{name}")
     status 405
     return {error: "Repository already exists!"}.to_json
   end
   FileUtils.mkdir_p(settings.location)
   FileUtils.mkdir("#{settings.location}/#{name}")
+
+  vendor = payload.fetch("vendor", "undefined")
+  summary = payload.fetch("summary", "undefined")
+  priority = payload.fetch("priority", 1).to_i
+  url = payload.fetch("url", nil)
+  architecture = payload.fetch("architecture", nil)
+
+  File.open("#{settings.location}/#{name}/repo.info", 'w') do |fh|
+    fh.write("name #{name}\n")
+    fh.write("vendor \"#{vendor}\"\n")
+    fh.write("summary \"#{summary}\"\n")
+    fh.write("priority #{priority}\n")
+    fh.write("url #{url}\n")
+    fh.write("architecture #{architecture}\n")
+  end
+
+  return {info: "Repository created"}.to_json
 end
 
 get '/repo/:name' do
@@ -82,4 +101,5 @@ delete '/repo/:name' do
     return {error: "Repository doesn't exist!"}.to_json
   end
   FileUtils.rm_rf("#{settings.location}/#{name}")
+  return {info: "Success"}.to_json
 end
